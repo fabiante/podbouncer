@@ -1,8 +1,16 @@
 # podreaper
-// TODO(user): Add simple overview of use/purpose
+
+Podreaper is a [Kubernetes operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+responsible for deleting non-running pods after a configurable grace period.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+
+Using podreaper in your cluster will result in the deletion of all pods in one of
+these states: `Pending`, `Completed`, `Failed`
+
+This operator acts on pods of all namespaces, except the `kube-system` namespace.
+
+// TODO: An in-depth paragraph about overview of use
 
 ## Getting Started
 
