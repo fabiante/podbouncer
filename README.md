@@ -97,6 +97,17 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 kubectl apply -f https://raw.githubusercontent.com/<org>/podbouncer/<tag or branch>/dist/install.yaml
 ```
 
+## Testing
+
+### Create Test Pods
+
+To test podbouncer, you must have some non-running pods in your cluster:
+
+```shell
+kubectl run --restart=Never --image busybox some-pod
+kubectl run --restart=Never --image busybox some-other-pod
+```
+
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project
 
