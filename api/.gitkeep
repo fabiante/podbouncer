@@ -1,0 +1,3 @@
+This directory is required by the Dockerfile.
+
+Let's rather keep this empty dir instead of chaning the Dockerfile.
