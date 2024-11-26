@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     control-plane: controller-manager
-    app.kubernetes.io/name: podreaper
+    app.kubernetes.io/name: podbouncer
     app.kubernetes.io/managed-by: kustomize
   name: controller-manager-metrics-service
   namespace: system
