@@ -109,11 +109,11 @@ kubectl run --restart=Never --image busybox some-other-pod
 ```
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
-**NOTE:** Run `make help` for more information on all potential `make` targets
+This project is a personal learning project.
 
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+You are welcome to use it, learn from it. You are welcome to submit pull requests,
+but I do not guarantee any level of activity on this project.
 
 ## License
 
