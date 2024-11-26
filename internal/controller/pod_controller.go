@@ -36,10 +36,10 @@ type PodReconciler struct {
 
 const maxPodAge = time.Second * 15 // TODO: Add configurable value for max age
 
-// TODO: Check if the rbac configuration below makes sense: Is the group actually fabitee.de !?
-// +kubebuilder:rbac:groups=fabitee.de,resources=pods,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=fabitee.de,resources=pods/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=fabitee.de,resources=pods/finalizers,verbs=update
+// TODO: Check if the permissions below are too broad. Maybe there are permissions this controller does not actually need.
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=pods/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
