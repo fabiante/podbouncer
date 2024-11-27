@@ -81,7 +81,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
 
-	logger.Info("Deleting non-running pod", "phase", pod.Status.Phase)
+	logger.Info("Deleting non-running pod", "phase", pod.Status.Phase, "podAge", podAge, "maxPodAge", maxPodAge)
 
 	if err := r.Delete(ctx, &pod); err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed to delete pod: %w", err)
