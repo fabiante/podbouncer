@@ -69,7 +69,11 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	// Ignore pods which have not yet reached the deletion deadline
 	// TODO: Refactor into testable function?
-	podCreatedAt := pod.GetCreationTimestamp() // TODO: Check for zero value?
+	podCreatedAt := pod.GetCreationTimestamp()
+	if podCreatedAt.IsZero() {
+		return ctrl.Result{}, fmt.Errorf("pod creation timestamp has unexpected zero value")
+	}
+
 	podAge := time.Since(podCreatedAt.Time)
 	maxPodAge := r.Config.MaxPodAge()
 	if podAge < maxPodAge {
