@@ -76,9 +76,11 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		// Pod is not yet read for deletion - run reconciliation again in one minute.
 		// We could wait the exact duration after which the object is reaches its max age
 		// (maxPodAge - podAge) but then this logic would not properly react to changes
-		// in the PodReconcilerConfig. To react to config updates, simply requeue in 1 minute
-		// which is a sensible delay for the operator to react to a config update.
-		return ctrl.Result{RequeueAfter: time.Minute}, nil
+		// in the PodReconcilerConfig. To react to config updates, simply requeue within one minute
+		// (which is a sensible delay for the operator to react to a config update) or less,
+		// if the pod expires before that.
+		requeueAfter := minDuration(time.Minute, maxPodAge+time.Second)
+		return ctrl.Result{RequeueAfter: requeueAfter}, nil
 	}
 
 	logger.Info("Deleting non-running pod", "phase", pod.Status.Phase, "podAge", podAge, "maxPodAge", maxPodAge)
@@ -90,6 +92,13 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	logger.Info("Pod deleted")
 
 	return ctrl.Result{}, nil
+}
+
+func minDuration(a, b time.Duration) time.Duration {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func (r *PodReconciler) shouldDeletePod(pod *v1.Pod) bool {
