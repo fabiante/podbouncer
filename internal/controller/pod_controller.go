@@ -35,9 +35,9 @@ import (
 type PodReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
-}
 
-const maxPodAge = time.Second * 15 // TODO: Add configurable value for max age
+	Config *PodReconcilerConfig
+}
 
 const excludedNamespace = "kube-system"
 
@@ -71,6 +71,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	// TODO: Refactor into testable function?
 	podCreatedAt := pod.GetCreationTimestamp() // TODO: Check for zero value?
 	podAge := time.Since(podCreatedAt.Time)
+	maxPodAge := r.Config.MaxPodAge()
 	if podAge < maxPodAge {
 		// Pod is not yet read for deletion - calculate the expected time when it can be deleted
 		requeueAfter := maxPodAge - podAge + time.Second
