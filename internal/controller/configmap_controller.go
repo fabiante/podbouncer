@@ -21,7 +21,9 @@ import (
 	"errors"
 	"fmt"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -57,7 +59,7 @@ func (r *ConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Ignore objects which should not be reconciled
 	if req.NamespacedName.String() != fmt.Sprintf("%s/%s", configMapObjectNamespace, configMapObjectName) {
-		return ctrl.Result{}, nil // TODO: Figure out if predicates are the proper way to filter out pods from kube-system namespace
+		return ctrl.Result{}, nil
 	}
 
 	// Get object
@@ -96,8 +98,28 @@ func (r *ConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ConfigMapReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	filter := func(o client.Object) bool {
+		return o.GetName() == configMapObjectName && o.GetNamespace() == configMapObjectNamespace
+	}
+
+	p := predicate.Funcs{
+		CreateFunc: func(e event.TypedCreateEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+		DeleteFunc: func(e event.TypedDeleteEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+		UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
+			return filter(e.ObjectNew)
+		},
+		GenericFunc: func(e event.TypedGenericEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
-		Watches(&v1.ConfigMap{}, &handler.EnqueueRequestForObject{}). // TODO: Filter for the single config map object for this controller
+		Watches(&v1.ConfigMap{}, &handler.EnqueueRequestForObject{}).
+		WithEventFilter(p).
 		Named("configmap").
 		Complete(r)
 }
