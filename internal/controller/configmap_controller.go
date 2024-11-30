@@ -41,12 +41,11 @@ type ConfigMapReconciler struct {
 	Scheme *runtime.Scheme
 
 	Config *PodReconcilerConfig
-}
 
-const (
-	configMapObjectNamespace = "podbouncer-system" // TODO: Make configurable
-	configMapObjectName      = "podbouncer-config" // TODO: Make configurable
-)
+	// ConfigMapFullName is the namespace + name of the ConfigMap object
+	// to be reconciled by this reconciler.
+	ConfigMapFullName string
+}
 
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=configmaps/status,verbs=get
@@ -57,7 +56,7 @@ func (r *ConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	logger := log.FromContext(ctx)
 
 	// Ignore objects which should not be reconciled
-	if req.NamespacedName.String() != fmt.Sprintf("%s/%s", configMapObjectNamespace, configMapObjectName) {
+	if req.NamespacedName.String() != r.ConfigMapFullName {
 		return ctrl.Result{}, nil
 	}
 
@@ -96,9 +95,9 @@ func (r *ConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ConfigMapReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ConfigMapReconciler) SetupWithManager(mgr ctrl.Manager, configMapFullName string) error {
 	filter := func(o client.Object) bool {
-		return o.GetName() == configMapObjectName && o.GetNamespace() == configMapObjectNamespace
+		return fmt.Sprintf("%s/%s", o.GetNamespace(), o.GetName()) == configMapFullName
 	}
 
 	p := predicate.Funcs{
