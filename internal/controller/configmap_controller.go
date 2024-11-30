@@ -48,10 +48,8 @@ const (
 	configMapObjectName      = "podbouncer-config" // TODO: Make configurable
 )
 
-// TODO: Check if the permissions below are too broad. Maybe there are permissions this controller does not actually need.
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=configmaps/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=configmaps/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
