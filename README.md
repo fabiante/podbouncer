@@ -19,10 +19,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config
+  namespace: podbouncer-system
   labels:
     control-plane: controller-manager
     app.kubernetes.io/name: podbouncer
-    app.kubernetes.io/managed-by: kustomize
 data:
   maxPodAge: "1h"
 ```
