@@ -35,9 +35,9 @@ import (
 type PodReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
-}
 
-const maxPodAge = time.Second * 15 // TODO: Add configurable value for max age
+	Config *PodReconcilerConfig
+}
 
 const excludedNamespace = "kube-system"
 
@@ -69,16 +69,25 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	// Ignore pods which have not yet reached the deletion deadline
 	// TODO: Refactor into testable function?
-	podCreatedAt := pod.GetCreationTimestamp() // TODO: Check for zero value?
+	podCreatedAt := pod.GetCreationTimestamp()
+	if podCreatedAt.IsZero() {
+		return ctrl.Result{}, fmt.Errorf("pod creation timestamp has unexpected zero value")
+	}
+
 	podAge := time.Since(podCreatedAt.Time)
+	maxPodAge := r.Config.MaxPodAge()
 	if podAge < maxPodAge {
-		// Pod is not yet read for deletion - calculate the expected time when it can be deleted
-		requeueAfter := maxPodAge - podAge + time.Second
-		logger.Info("Pod may eventually be deleted", "age", podAge, "phase", pod.Status.Phase, "deletionIn", requeueAfter, "deletionAt", time.Now().Add(requeueAfter))
+		// Pod is not yet read for deletion - run reconciliation again in one minute.
+		// We could wait the exact duration after which the object is reaches its max age
+		// (maxPodAge - podAge) but then this logic would not properly react to changes
+		// in the PodReconcilerConfig. To react to config updates, simply requeue within one minute
+		// (which is a sensible delay for the operator to react to a config update) or less,
+		// if the pod expires before that.
+		requeueAfter := minDuration(time.Minute, maxPodAge+time.Second)
 		return ctrl.Result{RequeueAfter: requeueAfter}, nil
 	}
 
-	logger.Info("Deleting non-running pod", "phase", pod.Status.Phase)
+	logger.Info("Deleting non-running pod", "phase", pod.Status.Phase, "podAge", podAge, "maxPodAge", maxPodAge)
 
 	if err := r.Delete(ctx, &pod); err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed to delete pod: %w", err)
@@ -87,6 +96,13 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	logger.Info("Pod deleted")
 
 	return ctrl.Result{}, nil
+}
+
+func minDuration(a, b time.Duration) time.Duration {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func (r *PodReconciler) shouldDeletePod(pod *v1.Pod) bool {
