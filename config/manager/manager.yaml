@@ -70,6 +70,9 @@ spec:
           capabilities:
             drop:
             - "ALL"
+        env:
+          - name: PODBOUNCER_CONFIG_MAP_FULL_NAME
+            value: podbouncer-system/podbouncer-config
         livenessProbe:
           httpGet:
             path: /healthz
