@@ -39,6 +39,11 @@ _Note:_ This installs podbouncer in the `podbouncer-system` namespace.
 kubectl apply -f https://raw.githubusercontent.com/fabiante/podbouncer/refs/heads/main/dist/install.yaml
 ```
 
+## Constraints
+
+This operator currently requires the usage of the `podbouncer-system` namespace and will
+only load its configuration from a ConfigMap object named `podbouncer-config` (in the same namespace).
+
 ## Getting Started (Local Build + Deploy)
 
 ### Prerequisites
@@ -48,9 +53,6 @@ kubectl apply -f https://raw.githubusercontent.com/fabiante/podbouncer/refs/head
 - Access to a Kubernetes v1.11.3+ cluster.
 
 ### To Deploy on the cluster
-
-The operator is not yet build and release to any Image & Manifest registry, thus you
-have to build and deploy it from source (this project).
 
 **Build and push your image to the location specified by `IMG`:**
 
