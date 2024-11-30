@@ -10,7 +10,22 @@ these states: `Pending`, `Completed`, `Failed`
 
 This operator acts on pods of all namespaces, except the `kube-system` namespace.
 
-// TODO: An in-depth paragraph about overview of use
+This controller is fairly simple and has only one configuration option can configure
+via a ConfigMap: The `maxPodAge` field controls the maximum age a non-running pod
+may have before it will be deleted by this controller.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: podbouncer
+    app.kubernetes.io/managed-by: kustomize
+data:
+  maxPodAge: "1h"
+```
 
 ## Getting Started
 
