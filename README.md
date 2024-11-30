@@ -27,7 +27,19 @@ data:
   maxPodAge: "1h"
 ```
 
-## Getting Started
+## Quick Start
+
+If you simply want to run podbouncer on your cluster, you can use the command below:
+
+**Warning:** With this command you will run a potentially destructive controller in your cluster.
+
+_Note:_ This installs podbouncer in the `podbouncer-system` namespace.
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/fabiante/podbouncer/refs/heads/main/dist/install.yaml
+```
+
+## Getting Started (Local Build + Deploy)
 
 ### Prerequisites
 - go version v1.22.0+
