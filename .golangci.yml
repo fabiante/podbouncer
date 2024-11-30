@@ -8,6 +8,8 @@ issues:
   exclude-use-default: false
   # restore some of the defaults
   # (fill in the rest as needed)
+  exclude-dirs:
+    - "test/e2e/*"
   exclude-rules:
     - path: "api/*"
       linters:
