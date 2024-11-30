@@ -18,10 +18,11 @@ package controller
 
 import (
 	"fmt"
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
-	"testing"
 )
 
 var _ = Describe("Pod Controller", func() {
