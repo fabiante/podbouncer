@@ -25,8 +25,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // PodReconciler reconciles a Pod object
@@ -36,6 +38,8 @@ type PodReconciler struct {
 }
 
 const maxPodAge = time.Second * 15 // TODO: Add configurable value for max age
+
+const excludedNamespace = "kube-system"
 
 // TODO: Check if the permissions below are too broad. Maybe there are permissions this controller does not actually need.
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
@@ -48,8 +52,8 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	logger := log.FromContext(ctx)
 
 	// Ignore pods which should not be reconciled
-	if req.Namespace == "kube-system" {
-		return ctrl.Result{}, nil // TODO: Figure out if predicates are the proper way to filter out pods from kube-system namespace
+	if req.Namespace == excludedNamespace {
+		return ctrl.Result{}, nil
 	}
 
 	// Retrieve pod
@@ -92,8 +96,28 @@ func (r *PodReconciler) shouldDeletePod(pod *v1.Pod) bool {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	filter := func(o client.Object) bool {
+		return o.GetNamespace() != excludedNamespace
+	}
+
+	p := predicate.Funcs{
+		CreateFunc: func(e event.TypedCreateEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+		DeleteFunc: func(e event.TypedDeleteEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+		UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
+			return filter(e.ObjectNew)
+		},
+		GenericFunc: func(e event.TypedGenericEvent[client.Object]) bool {
+			return filter(e.Object)
+		},
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
-		Watches(&v1.Pod{}, &handler.EnqueueRequestForObject{}). // TODO: Figure out if predicates are the proper way to filter out pods from kube-system namespace
+		Watches(&v1.Pod{}, &handler.EnqueueRequestForObject{}).
+		WithEventFilter(p).
 		Named("pod").
 		Complete(r)
 }
