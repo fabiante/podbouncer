@@ -10,7 +10,22 @@ these states: `Pending`, `Completed`, `Failed`
 
 This operator acts on pods of all namespaces, except the `kube-system` namespace.
 
-// TODO: An in-depth paragraph about overview of use
+This controller is fairly simple and has only one configuration option can configure
+via a ConfigMap: The `maxPodAge` field controls the maximum age a non-running pod
+may have before it will be deleted by this controller.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: podbouncer
+    app.kubernetes.io/managed-by: kustomize
+data:
+  maxPodAge: "1h"
+```
 
 ## Getting Started
 
@@ -21,10 +36,14 @@ This operator acts on pods of all namespaces, except the `kube-system` namespace
 - Access to a Kubernetes v1.11.3+ cluster.
 
 ### To Deploy on the cluster
+
+The operator is not yet build and release to any Image & Manifest registry, thus you
+have to build and deploy it from source (this project).
+
 **Build and push your image to the location specified by `IMG`:**
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/podbouncer:tag
+make docker-build docker-push IMG=<some-registry>/podbouncer:latest
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
@@ -33,40 +52,26 @@ Make sure you have the proper permission to the registry if the above commands d
 
 **Install the CRDs into the cluster:**
 
-```sh
-make install
-```
+Since the controller does not use any custom resources, no CRDs have to be installed in your cluster.
 
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 
 ```sh
-make deploy IMG=<some-registry>/podbouncer:tag
+make deploy IMG=<some-registry>/podbouncer:latest
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
 privileges or be logged in as admin.
 
-**Create instances of your solution**
-You can apply the samples (examples) from the config/sample:
+**Change controller configuration**
+If you want to configure the controller, modify the ConfigMap in `config/samples/config.yaml`
+and re-deploy the project
 
 ```sh
-kubectl apply -k config/samples/
+make deploy IMG=<some-registry>/podbouncer:latest
 ```
-
->**NOTE**: Ensure that the samples has default values to test it out.
 
 ### To Uninstall
-**Delete the instances (CRs) from the cluster:**
-
-```sh
-kubectl delete -k config/samples/
-```
-
-**Delete the APIs(CRDs) from the cluster:**
-
-```sh
-make uninstall
-```
 
 **UnDeploy the controller from the cluster:**
 
@@ -81,7 +86,7 @@ Following are the steps to build the installer and distribute this project to us
 1. Build the installer for the image built and published in the registry:
 
 ```sh
-make build-installer IMG=<some-registry>/podbouncer:tag
+make build-installer IMG=<some-registry>/podbouncer:latest
 ```
 
 NOTE: The makefile target mentioned above generates an 'install.yaml'
