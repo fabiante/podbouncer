@@ -5,6 +5,11 @@
 domain: fabitee.de
 layout:
 - go.kubebuilder.io/v4
-projectName: podreaper
+projectName: podbouncer
 repo: github.com/fabiante/podbouncer
+resources:
+- controller: true
+  domain: fabitee.de
+  kind: Pod
+  version: v1alpha1
 version: "3"

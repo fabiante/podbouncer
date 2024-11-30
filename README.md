@@ -1,11 +1,11 @@
-# podreaper
+# podbouncer
 
-Podreaper is a [Kubernetes operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+Podbouncer is a [Kubernetes operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 responsible for deleting non-running pods after a configurable grace period.
 
 ## Description
 
-Using podreaper in your cluster will result in the deletion of all pods in one of
+Using podbouncer in your cluster will result in the deletion of all pods in one of
 these states: `Pending`, `Completed`, `Failed`
 
 This operator acts on pods of all namespaces, except the `kube-system` namespace.
@@ -24,7 +24,7 @@ This operator acts on pods of all namespaces, except the `kube-system` namespace
 **Build and push your image to the location specified by `IMG`:**
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/podreaper:tag
+make docker-build docker-push IMG=<some-registry>/podbouncer:tag
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
@@ -40,7 +40,7 @@ make install
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 
 ```sh
-make deploy IMG=<some-registry>/podreaper:tag
+make deploy IMG=<some-registry>/podbouncer:tag
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
@@ -81,7 +81,7 @@ Following are the steps to build the installer and distribute this project to us
 1. Build the installer for the image built and published in the registry:
 
 ```sh
-make build-installer IMG=<some-registry>/podreaper:tag
+make build-installer IMG=<some-registry>/podbouncer:tag
 ```
 
 NOTE: The makefile target mentioned above generates an 'install.yaml'
@@ -94,15 +94,26 @@ its dependencies.
 Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project, i.e.:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/<org>/podreaper/<tag or branch>/dist/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/<org>/podbouncer/<tag or branch>/dist/install.yaml
+```
+
+## Testing
+
+### Create Test Pods
+
+To test podbouncer, you must have some non-running pods in your cluster:
+
+```shell
+kubectl run --restart=Never --image busybox some-pod
+kubectl run --restart=Never --image busybox some-other-pod
 ```
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
-**NOTE:** Run `make help` for more information on all potential `make` targets
+This project is a personal learning project.
 
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+You are welcome to use it, learn from it. You are welcome to submit pull requests,
+but I do not guarantee any level of activity on this project.
 
 ## License
 
