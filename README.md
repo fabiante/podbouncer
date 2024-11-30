@@ -19,12 +19,41 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config
+  namespace: podbouncer-system
   labels:
     control-plane: controller-manager
     app.kubernetes.io/name: podbouncer
-    app.kubernetes.io/managed-by: kustomize
 data:
   maxPodAge: "1h"
+```
+
+This ConfigMap is expected to be in the `podbouncer-system` namespace and named `podbouncer-config`.
+
+You may use the `PODBOUNCER_CONFIG_MAP_FULL_NAME` env variable on the controller
+pod to customize the namespace + name of the ConfigMap used by the controller.
+
+*Keep in mind, that you must ensure the controller has the proper permission to access
+the ConfigMap object for reading.*
+
+```shell
+apiVersion: apps/v1
+kind: Deployment
+# ...
+spec:
+  # ...
+  template:
+    # ...
+    spec:
+      # ...
+      containers:
+      - command:
+        - /manager
+        image: controller:latest
+        name: manager
+        # ...
+        env:
+          - name: PODBOUNCER_CONFIG_MAP_FULL_NAME
+            value: podbouncer-system/podbouncer-config
 ```
 
 ## Getting Started

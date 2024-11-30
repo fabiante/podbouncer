@@ -142,6 +142,11 @@ func main() {
 
 	podReconcilerConfig := controller.NewPodReconcilerConfig()
 
+	configMapFullName := os.Getenv("PODBOUNCER_CONFIG_MAP_FULL_NAME")
+	if configMapFullName == "" {
+		configMapFullName = "podbouncer-system/podbouncer-config"
+	}
+
 	if err = (&controller.PodReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -151,10 +156,11 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.ConfigMapReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: podReconcilerConfig,
-	}).SetupWithManager(mgr); err != nil {
+		Client:            mgr.GetClient(),
+		Scheme:            mgr.GetScheme(),
+		Config:            podReconcilerConfig,
+		ConfigMapFullName: configMapFullName,
+	}).SetupWithManager(mgr, configMapFullName); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ConfigMap")
 		os.Exit(1)
 	}
