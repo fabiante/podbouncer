@@ -15,13 +15,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - configmaps/finalizers
-  - pods/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
   - configmaps/status
   verbs:
   - get
